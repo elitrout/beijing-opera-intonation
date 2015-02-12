@@ -48,7 +48,8 @@ def extractFeatures(arffDir = '.', dirname = '.', fnames = '', segment_length = 
 			continue
 		
 		# Read audio and some more info
-		loader = es.EasyLoader(filename = dirname+"/"+fname)
+		# loader = es.EasyLoader(filename = dirname+"/"+fname)
+                loader = es.EasyLoader(filename = fname)
 		audio = loader.compute()
 		sampleRate = loader.paramValue('sampleRate')
 		length = int(len(audio)/sampleRate)
