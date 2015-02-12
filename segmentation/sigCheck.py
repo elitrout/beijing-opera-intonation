@@ -58,3 +58,4 @@ def check(root):
 				copy(miss,root+'/'+folder+'/'+folder+'_'+n+'.sig')
 if __name__ == '__main__':
 	check(root)
+        print 'sigCheck.py finished'

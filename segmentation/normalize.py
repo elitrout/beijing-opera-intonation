@@ -60,7 +60,8 @@ if sys.argv[1] == "train":
 #		print i, max(data[:, i]), min(data[:, i])
 	outfile = file(sys.argv[3], 'w')
 	outfile.write(prologue)
-	labels = np.loadtxt(sys.argv[2], dtype='float', comments='@', delimiter=',', usecols=[numFeats])
+	# labels = np.loadtxt(sys.argv[2], dtype='float', comments='@', delimiter=',', usecols=[numFeats])
+	labels = np.loadtxt(sys.argv[2], dtype=str, comments='@', delimiter=',', usecols=[numFeats])
 	float_labels = []
 	'''
 	for label in labels:
@@ -69,7 +70,13 @@ if sys.argv[1] == "train":
 		else:
 			float_labels.append(0.)
 	'''
-	data = np.column_stack([data, labels])
+	for label in labels:
+		if label == 'instrumental':
+			float_labels.append(1.)
+		else:
+			float_labels.append(0.)
+	# data = np.column_stack([data, labels])
+        data = np.column_stack([data, float_labels])
 	np.savetxt('dataTMP.txt', data, delimiter=',')
 	#Weird. Python does not seem to have a nice way to 'append' array data to a file. 
 	#It can only create a new file and write.
