@@ -100,7 +100,8 @@ def extractFeatures(arffDir = '.', dirname = '.', fnames = '', segment_length = 
 			
 			# Harmonic spectral features (TODO: Is the magnitude threshold ok?)
 			harmonicPeaks = es.HarmonicPeaks()
-			pitch = es.PitchDetection()	# Using YIN instead of predominant pitch analysis as this frame-based analysis
+			# pitch = es.PitchDetection()	# Using YIN instead of predominant pitch analysis as this frame-based analysis
+			pitch = es.PitchYinFFT()	# Using YIN instead of predominant pitch analysis as this frame-based analysis
 
 
 			# Windowing
