@@ -71,7 +71,7 @@ if sys.argv[1] == "train":
 			float_labels.append(0.)
 	'''
 	for label in labels:
-		if label == 'instrumental':
+		if label == ' instrument':    # beware of the space at the beginning
 			float_labels.append(1.)
 		else:
 			float_labels.append(0.)
