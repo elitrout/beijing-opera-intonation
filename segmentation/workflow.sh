@@ -31,7 +31,7 @@ sed -n '192,$p' ./data/feature/test_voice/voice2.arff >> ./data/feature/test_voi
 cp ./data/feature/test_nonvoice/nonvoice0.arff ./data/feature/test_nonvoice/nonvoice.arff
 sed -n '192,$p' ./data/feature/test_nonvoice/nonvoice1.arff >> ./data/feature/test_nonvoice/nonvoice.arff
 # ...
-# append to classes
+# append two classes
 mkdir data/feature/test_merge
 cp ./data/feature/test_voice/voice.arff ./data/feature/test_merge/merge.arff
 # feature value starts from line 192
