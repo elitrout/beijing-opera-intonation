@@ -87,10 +87,10 @@ if sys.argv[1] == "train":
 
 elif sys.argv[1] == "test":
 	#read limits obtained from train data and do normalization accordingly
-	#temp = file(sys.argv[2], "r").readlines()
-	#numFeats = len(temp[-1].strip().split(","))-1
-	#del temp
-	numFeats = 36 #NOTE: Hardcoded to reduce i/o, uncomment the above lines and delete this if necessary
+	temp = file(sys.argv[2], "r").readlines()
+	numFeats = len(temp[-1].strip().split(","))-1
+	del temp
+	# numFeats = 36 #NOTE: Hardcoded to reduce i/o, uncomment the above lines and delete this if necessary
 	data = np.loadtxt(sys.argv[2], dtype='float', delimiter=',', comments='@', usecols=range(numFeats))
 	trainLimits = []
 	for i in xrange(numFeats):
@@ -111,7 +111,8 @@ elif sys.argv[1] == "test":
 			break
 	#numFeats = len(temp[-1].strip().split(","))-1
 	del temp
-	for f in sys.argv[3:-2]:
+	# for f in sys.argv[3:-2]:    # index error
+	for f in sys.argv[3:-1]:
 		print f
 		data = np.loadtxt(f, dtype='float', delimiter=',', comments='@', usecols=range(numFeats))
 		for i in xrange(numFeats):
@@ -127,8 +128,21 @@ elif sys.argv[1] == "test":
 			#The following is because weka complains if the numbers are too small (I guess 1.0e-8)
 			data[:, i] = data[:, i]*topLimit
 		
-		outfile = file(sys.argv[-1]+"/"+basename(f), 'w')
+		# outfile = file(sys.argv[-1]+"/"+basename(f), 'w')
+                outfilename = basename(f)
+                outfilename = outfilename[:-5] + '_norm.arff'
+		outfile = file(sys.argv[-1]+"/"+outfilename, 'w')
 		outfile.write(prologue)
+
+                labels = np.loadtxt(f, dtype=str, comments='@', delimiter=',', usecols=[numFeats])
+                float_labels = []
+                for label in labels:
+                        if label == ' instrument':    # beware of the space at the beginning
+                                float_labels.append(1.)
+                        else:
+                                float_labels.append(0.)
+                data = np.column_stack([data, float_labels])
+
 		np.savetxt('dataTMP.txt', data, delimiter=',')
 		#Weird. Python does not seem to have a nice way to 'append' array data to a file. 
 		#It can only create a new file and write.
@@ -136,6 +150,7 @@ elif sys.argv[1] == "test":
 		unlink('dataTMP.txt')
 		for line in temp:
 			line = line.strip()
-			line = line+",?\n"
+			line = line+"\n"
+			# line = line+",?\n"
 			outfile.write(line)
 		outfile.close()
