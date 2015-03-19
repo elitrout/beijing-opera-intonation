@@ -99,16 +99,28 @@ for line in predOutput:
     p = p[1]
     prediction.append(int(float(p)))
 
+# smoothing prediction
+predLen = len(prediction)
+for i in range(predLen):
+    smoothWindow = prediction[max(0, i - 2) : min(predLen, i + 3)]
+    if prediction[i] == 1:    # 1:non-vocal, 0:vocal
+        if sum(smoothWindow) <= 1:
+            prediction[i] = 0
+    elif max(prediction[i : min(predLen, i + 3)]) == 0:
+        continue
+    elif sum(smoothWindow) >= 3:
+        prediction[i] = 1
+
 segStart = []
 segDuration = []
 segPred = []
 segStart.append(0.0)
-for i in range(1, len(prediction)):
+for i in range(1, predLen):
     if prediction[i] != prediction[i - 1]:
         segPred.append(prediction[i - 1])
         segDuration.append(i * windowLength - segStart[-1])
         segStart.append(i * windowLength)
-segDuration.append(len(prediction) * windowLength - segStart[-1])
+segDuration.append(predLen * windowLength - segStart[-1])
 segPred.append(prediction[-1])
 
 annotationFile = outputFolder + '/segAnnotation.txt'
