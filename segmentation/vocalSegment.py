@@ -1,13 +1,25 @@
 import os, sys
 
+"""
+A wrap-up for vocal/non-vocal segmentation using pre-trained model. It takes an 
+audio file as input and generates the segmentation annotation file which can be 
+opened with SonicVisualiser.
+
+Usage:
+python vocalSegment.py inputFile outputFolder
+
+Note: change the javapath below.
+
+"""
+
 # Step 0: Change the Weka class adress to your setting
 JAVAPATH = "/Applications/weka-3-6-11-apple-jvm.app/Contents/Resources" \
            + "/Java/weka.jar"
 
-# inputFile = sys.argv[1]
-# outputFile = sys.argv[2]
-inputFile = './data/laoshengxipi04.wav'
-outputFolder = './data/output'
+inputFile = sys.argv[1]
+outputFile = sys.argv[2]
+# inputFile = './data/laoshengxipi04.wav'
+# outputFolder = './data/output'
 
 os.makedirs(outputFolder)
 
@@ -72,15 +84,6 @@ predictionFile = outputFolder + '/prediction.txt'
 cmdPredict = 'java -cp ' + JAVAPATH + ' weka.classifiers.functions.SMO -T ' \
              + normFile + ' -l ' + modelFile + ' -p 0 > ' + predictionFile
 os.system(cmdPredict)
-# import time
-# p = 0
-# p = os.system(cmdPredict)
-# while p == 0:
-#     time.sleep(0.5)
-
-# p = subprocess.Popen(['java', 'weka.classifiers.functions.SMO', '-T', \
-#                       normFile, '-l', modelFile, '-p', '0'])
-# p.wait()
 
 ## Step 6: Generate segmentation annotation file based on prediction
 
