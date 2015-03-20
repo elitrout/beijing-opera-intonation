@@ -8,7 +8,7 @@ opened with SonicVisualiser.
 Usage:
 python vocalSegment.py inputFile outputFolder
 
-Note: change the javapath below.
+Note: change the JAVAPATH below.
 
 """
 
@@ -17,9 +17,9 @@ JAVAPATH = "/Applications/weka-3-6-11-apple-jvm.app/Contents/Resources" \
            + "/Java/weka.jar"
 
 inputFile = sys.argv[1]
-outputFile = sys.argv[2]
+# outputFolder = sys.argv[2]
 # inputFile = './data/laoshengxipi04.wav'
-# outputFolder = './data/output'
+outputFolder = './data/output_' + os.path.basename(inputFile)[:-4]
 
 os.makedirs(outputFolder)
 
@@ -102,35 +102,48 @@ for line in predOutput:
     p = p[1]
     prediction.append(int(float(p)))
 
-# smoothing prediction
-predLen = len(prediction)
-for i in range(predLen):
-    smoothWindow = prediction[max(0, i - 2) : min(predLen, i + 3)]
-    if prediction[i] == 1:    # 1:non-vocal, 0:vocal
-        if sum(smoothWindow) <= 1:
-            prediction[i] = 0
-    elif max(prediction[i : min(predLen, i + 3)]) == 0:
-        continue
-    elif sum(smoothWindow) >= 3:
-        prediction[i] = 1
+def smoothPrediction(prediction):
+    """ Smooth prediction """
 
-segStart = []
-segDuration = []
-segPred = []
-segStart.append(0.0)
-for i in range(1, predLen):
-    if prediction[i] != prediction[i - 1]:
-        segPred.append(prediction[i - 1])
-        segDuration.append(i * windowLength - segStart[-1])
-        segStart.append(i * windowLength)
-segDuration.append(predLen * windowLength - segStart[-1])
-segPred.append(prediction[-1])
+    predSmooth = prediction[:]
+    predLen = len(predSmooth)
 
-annotationFile = outputFolder + '/segAnnotation.txt'
-f = open(annotationFile, 'w')
-label = ['V', 'N']    # V:vocal, N:non-vocal
-for i in range(len(segStart)):
-    anno = str(segStart[i]) + '\t' + str(segPred[i]) + '\t' \
-           + str(segDuration[i]) + '\t' + label[segPred[i]] + '\n'
-    f.write(anno)
-f.close()
+    for i in range(predLen):
+        smoothWindow = predSmooth[max(0, i - 2) : min(predLen, i + 3)]
+        if predSmooth[i] == 1:    # 1:non-vocal, 0:vocal
+            if sum(smoothWindow) <= 1:
+                predSmooth[i] = 0
+        elif max(predSmooth[i : min(predLen, i + 3)]) == 0:
+            continue
+        elif sum(smoothWindow) >= 3:
+            predSmooth[i] = 1
+
+    return predSmooth
+
+def annotationGen(prediction, annotationFile):
+    """ Write annotation to file """
+
+    predLen = len(prediction)
+    segStart = []
+    segDuration = []
+    segPred = []
+    segStart.append(0.0)
+    for i in range(1, predLen):
+        if prediction[i] != prediction[i - 1]:
+            segPred.append(prediction[i - 1])
+            segDuration.append(i * windowLength - segStart[-1])
+            segStart.append(i * windowLength)
+    segDuration.append(predLen * windowLength - segStart[-1])
+    segPred.append(prediction[-1])
+
+    f = open(annotationFile, 'w')
+    label = ['V', 'N']    # V:vocal, N:non-vocal
+    for i in range(len(segStart)):
+        anno = str(segStart[i]) + '\t' + str(segPred[i]) + '\t' \
+               + str(segDuration[i]) + '\t' + label[segPred[i]] + '\n'
+        f.write(anno)
+    f.close()
+
+predSmooth = smoothPrediction(prediction)
+annotationGen(prediction, outputFolder + '/segAnnotation.txt')
+annotationGen(predSmooth, outputFolder + '/segAnnotationSmooth.txt')
