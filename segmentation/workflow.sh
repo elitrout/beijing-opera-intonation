@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# The wrap-up of the whole process is in ./vocalSegment.py.
+
 ## 1. Feature extraction
 # Essentia memory leak!!!
 # python extractFeatures.py --inputFolder ./ --outputFolder ./ --length 0.5 --hopsize 0.1
