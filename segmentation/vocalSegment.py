@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os, sys
 
 """
@@ -8,7 +11,9 @@ opened with SonicVisualiser.
 Usage:
 python vocalSegment.py inputFile outputFolder
 
-Note: change the JAVAPATH below.
+Prerequisites: 
+1. Weka (change the Weka JAVAPATH below)
+2. Essentia
 
 """
 
