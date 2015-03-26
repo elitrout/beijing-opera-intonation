@@ -136,7 +136,7 @@ if __name__ ==  '__main__':
 
     print '\n... Step 4/6: Normalizing features ...\n'
     # trainData = './data/feature/test_merge/merge.arff'
-    normvalueFile = './data/feature/test_merge/merge_norm_normvalue'
+    normvalueFile = './data/feature/test_merge/merge_norm_normvalue.pkl'
     arffFile = featureFolder + '.arff'
 
     # replace class name for some internal reasons

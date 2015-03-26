@@ -89,7 +89,7 @@ if sys.argv[1] == "train":
 	outfile.close()
 
         # write norm values into file
-	outfile_norm = file(sys.argv[3][: -5] + '_normvalue', 'w')
+	outfile_norm = file(sys.argv[3][: -5] + '_normvalue.pkl', 'w')
         pickle.dump(trainLimits, outfile_norm)
         outfile_norm.close()
 
