@@ -34,8 +34,8 @@ def convertFormat(featureFolder):
                        + ' --label voice --clusters voice,instrument'
     os.system(cmdConvertFormat)
 
-def normalize(trainData, arffFile, outputFolder, normFile):
-    cmdNormalize = "python normalize.py 'test' " + trainData + ' ' + arffFile \
+def normalize(normvalueFile, arffFile, outputFolder, normFile):
+    cmdNormalize = "python normalize.py 'test' " + normvalueFile + ' ' + arffFile \
                    + ' ' + outputFolder
     os.system(cmdNormalize)
 
@@ -135,13 +135,14 @@ if __name__ ==  '__main__':
     ## Step 4: Normalize features using training data
 
     print '\n... Step 4/6: Normalizing features ...\n'
-    trainData = './data/feature/test_merge/merge.arff'
+    # trainData = './data/feature/test_merge/merge.arff'
+    normvalueFile = './data/feature/test_merge/merge_norm_normvalue'
     arffFile = featureFolder + '.arff'
 
     # replace class name for some internal reasons
     normFile = featureFolder + '_norm.arff'
 
-    normalize(trainData, arffFile, outputFolder, normFile)
+    normalize(normvalueFile, arffFile, outputFolder, normFile)
 
     ## Step 5: Prediction
 

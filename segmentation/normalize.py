@@ -9,6 +9,7 @@ import sys
 import numpy as np
 from os import unlink
 from os.path import basename
+import cPickle as pickle
 
 topLimit=100000
 
@@ -18,7 +19,7 @@ if len(sys.argv) < 2:
 	Usage:
 	------
 	python normalize.py 'train' trainFile normalizedTrainFile (OR)
-	python normalize.py 'test' trainFile testFiles destDirectory
+	python normalize.py 'test' normvalueFile testFiles destDirectory
 	"""
 	exit()
 
@@ -36,6 +37,7 @@ if sys.argv[1] == "train":
 	numFeats = len(temp[-1].strip().split(","))-1
 	del temp
 	data = np.loadtxt(sys.argv[2], dtype='float', delimiter=',', comments='@', usecols=range(numFeats))
+	trainLimits = []
 	for i in xrange(numFeats):
 		temp = data[:, i]
 		infAlert = 0
@@ -47,6 +49,7 @@ if sys.argv[1] == "train":
 			temp = temp[temp > -np.inf]
 		_max = max(temp)
 		_min = min(temp)
+		trainLimits.append([_min, _max])
 		data[:, i] = (data[:, i]-_min)/(_max-_min)
 		#TODO: Is there a better way to handle inf & nan values?
 		_min = min(abs(data[:, i])) 
@@ -85,25 +88,36 @@ if sys.argv[1] == "train":
 	outfile.write(temp)
 	outfile.close()
 
+        # write norm values into file
+	outfile_norm = file(sys.argv[3][: -5] + '_normvalue', 'w')
+        pickle.dump(trainLimits, outfile_norm)
+        outfile_norm.close()
+
 elif sys.argv[1] == "test":
-	#read limits obtained from train data and do normalization accordingly
-	temp = file(sys.argv[2], "r").readlines()
-	numFeats = len(temp[-1].strip().split(","))-1
-	del temp
-	# numFeats = 36 #NOTE: Hardcoded to reduce i/o, uncomment the above lines and delete this if necessary
-	data = np.loadtxt(sys.argv[2], dtype='float', delimiter=',', comments='@', usecols=range(numFeats))
-	trainLimits = []
-	for i in xrange(numFeats):
-		temp = data[:, i]
-		infAlert = 0
-		temp = temp[temp < np.inf]
-		temp = temp[temp > -np.inf]
-		_max = max(temp)
-		_min = min(temp)
-		trainLimits.append([_min, _max])
+	# #read limits obtained from train data and do normalization accordingly
+	# temp = file(sys.argv[2], "r").readlines()
+	# numFeats = len(temp[-1].strip().split(","))-1
+	# del temp
+	# # numFeats = 36 #NOTE: Hardcoded to reduce i/o, uncomment the above lines and delete this if necessary
+	# data = np.loadtxt(sys.argv[2], dtype='float', delimiter=',', comments='@', usecols=range(numFeats))
+	# trainLimits = []
+	# for i in xrange(numFeats):
+	# 	temp = data[:, i]
+	# 	infAlert = 0
+	# 	temp = temp[temp < np.inf]
+	# 	temp = temp[temp > -np.inf]
+	# 	_max = max(temp)
+	# 	_min = min(temp)
+	# 	trainLimits.append([_min, _max])
+
+        # read norm values
+        f = open(sys.argv[2], 'rb')
+        trainLimits = pickle.load(f)
+        f.close()
 
 	#prologue is same for every file. read for one, and write for all.
 	temp = file(sys.argv[3], "r").readlines()
+        numFeats = len(temp[-1].strip().split(","))-1
 	prologue = ""
 	for line in temp:
 		prologue += line
