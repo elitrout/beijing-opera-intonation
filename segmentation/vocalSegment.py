@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
+from sys import platform as _platform
 
 """
 A wrap-up for vocal/non-vocal segmentation using pre-trained model. It takes an 
@@ -12,7 +13,7 @@ Usage:
 python vocalSegment.py inputFile
 
 Prerequisites: 
-1. Weka (change the Weka JAVAPATH below)
+1. Weka (check the Weka JAVAPATH below)
 2. Essentia
 
 """
@@ -39,9 +40,17 @@ def normalize(normvalueFile, arffFile, outputFolder, normFile):
                    + ' ' + outputFolder
     os.system(cmdNormalize)
 
-    cmdRenameClass = "sed -i '.original' 's/@ATTRIBUTE segment {voice, instrument}"\
-                     "/@ATTRIBUTE segment {0.000000000000000000e+00," \
-                     "1.000000000000000000e+00}/' " + normFile
+    if _platform == 'darwin':
+        cmdRenameClass = "sed -i '.original' 's/@ATTRIBUTE segment {voice, instrument}"\
+                         "/@ATTRIBUTE segment {0.000000000000000000e+00," \
+                         "1.000000000000000000e+00}/' " + normFile
+    elif _platform == "linux" or _platform == "linux2":
+        cmdRenameClass = "sed -i 's/@ATTRIBUTE segment {voice, instrument}"\
+                         "/@ATTRIBUTE segment {0.000000000000000000e+00," \
+                         "1.000000000000000000e+00}/' " + normFile
+    else:
+        print "\nError: Only support Mac and Linux"
+
     os.system(cmdRenameClass)
 
 def predict(JAVAPATH, normFile, modelFile, predictionFile):
@@ -96,9 +105,14 @@ def annotationGen(prediction, annotationFile):
 
 if __name__ ==  '__main__':
 
-    ## Step 0: Change the Weka class adress to your setting
-    JAVAPATH = "/Applications/weka-3-6-11-apple-jvm.app/Contents/Resources" \
-               + "/Java/weka.jar"
+    ## Step 0: Change the Weka class adress to your setting if necessary
+    if _platform == "darwin":
+        JAVAPATH = "/Applications/weka-3-6-11-apple-jvm.app/Contents/Resources" \
+                   + "/Java/weka.jar"
+    elif _platform == "linux" or _platform == "linux2":
+        JAVAPATH = "/usr/share/java/weka.jar"
+    else:
+        print "\nError: Only support Mac and Linux"
 
     inputFile = sys.argv[1]
     # outputFolder = sys.argv[2]
