@@ -74,7 +74,7 @@ if sys.argv[1] == "train":
 			float_labels.append(0.)
 	'''
 	for label in labels:
-		if label == ' instrument':    # beware of the space at the beginning
+		if label == ' instrument' or label == ' jinghu':    # beware of the space at the beginning
 			float_labels.append(1.)
 		else:
 			float_labels.append(0.)
@@ -151,7 +151,7 @@ elif sys.argv[1] == "test":
                 labels = np.loadtxt(f, dtype=str, comments='@', delimiter=',', usecols=[numFeats])
                 float_labels = []
                 for label in labels:
-                        if label == ' instrument':    # beware of the space at the beginning
+                        if label == ' instrument' or label == ' jinghu':    # beware of the space at the beginning
                                 float_labels.append(1.)
                         else:
                                 float_labels.append(0.)

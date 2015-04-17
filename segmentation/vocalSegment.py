@@ -78,7 +78,7 @@ def smoothPrediction(prediction):
 
     return predSmooth
 
-def annotationGen(prediction, annotationFile):
+def annotationGen(prediction, annotationFile, windowLength):
     """ Write annotation to file """
 
     predLen = len(prediction)
@@ -95,7 +95,7 @@ def annotationGen(prediction, annotationFile):
     segPred.append(prediction[-1])
 
     f = open(annotationFile, 'w')
-    label = ['V', 'N']    # V:vocal, N:non-vocal
+    label = ['V', 'P', 'J']    # V:vocal, P:percussion, J:jinghu
     for i in range(len(segStart)):
         anno = str(segStart[i]) + '\t' + str(segPred[i]) + '\t' \
                + str(segDuration[i]) + '\t' + label[segPred[i]] + '\n'
@@ -150,41 +150,84 @@ if __name__ ==  '__main__':
 
     print '\n... Step 4/6: Normalizing features ...\n'
     # trainData = './data/feature/test_merge/merge.arff'
-    normvalueFile = './data/feature/test_merge/merge_norm_normvalue.pkl'
-    arffFile = featureFolder + '.arff'
+    VNnormvalueFile = './data/feature/test_merge/merge_norm_normvalue.pkl'
+    VNarffFile = featureFolder + '.arff'
 
     # replace class name for some internal reasons
     normFile = featureFolder + '_norm.arff'
 
-    normalize(normvalueFile, arffFile, outputFolder, normFile)
+    normalize(VNnormvalueFile, VNarffFile, outputFolder, normFile)
+
+    VNnormFile = normFile[:-5] + 'VN.arff'
+    cmdRenameNormfile = 'mv ' + normFile + ' ' + VNnormFile
+    os.system(cmdRenameNormfile)
+
+    # trainData = './data/arias/merge/merge.arff'
+    JPnormvalueFile = './data/arias/merge/merge_norm_normvalue.pkl'
+    JParffFile = featureFolder + '.arff'
+
+    # replace class name for some internal reasons
+    normFile = featureFolder + '_norm.arff'
+
+    normalize(JPnormvalueFile, JParffFile, outputFolder, normFile)
+
+    JPnormFile = normFile[:-5] + 'JP.arff'
+    cmdRenameNormfile = 'mv ' + normFile + ' ' + JPnormFile
+    os.system(cmdRenameNormfile)
 
     ## Step 5: Prediction
 
     print '\n... Step 5/6: Predicting input data ...\n'
 
-    modelFile = './data/feature/test_merge/merge_norm.model'
-    predictionFile = outputFolder + '/prediction.txt'
+    VNmodelFile = './data/feature/test_merge/merge_norm.model'
+    VNpredictionFile = outputFolder + '/predictionVN.txt'
+    JPmodelFile = './data/arias/merge/jinghuPercussion.model'
+    JPpredictionFile = outputFolder + '/predictionJP.txt'
 
-    predict(JAVAPATH, normFile, modelFile, predictionFile)
+    predict(JAVAPATH, VNnormFile, VNmodelFile, VNpredictionFile)
+    predict(JAVAPATH, JPnormFile, JPmodelFile, JPpredictionFile)
 
     ## Step 6: Generate segmentation annotation file based on prediction
 
     print '\n... Step 6/6: Generating annotation file ...\n'
 
-    f = open(predictionFile, 'r')
-    predOutput = f.readlines()
+    # read vocal/non-vocal prediction
+    f = open(VNpredictionFile, 'r')
+    VNpredOutput = f.readlines()
     # trim unnecessary text
-    predOutput = predOutput[5 : -1]
+    VNpredOutput = VNpredOutput[5 : -1]
     f.close()
 
-    prediction = []
-    for line in predOutput:
+    VNprediction = []
+    for line in VNpredOutput:
         p = line.split()
         p = p[2].split(':')
         p = p[1]
-        prediction.append(int(float(p)))
+        VNprediction.append(int(float(p)))
 
-    predSmooth = smoothPrediction(prediction)
-    annotationGen(prediction, outputFolder + '/segAnnotation.txt')
-    annotationGen(predSmooth, outputFolder + '/segAnnotationSmooth.txt')
+    # smooth prediction
+    VNpredSmooth = smoothPrediction(VNprediction)
 
+    # read jinghu/percussion prediction file
+    f = open(JPpredictionFile, 'r')
+    JPpredOutput = f.readlines()
+    # trim unnecessary text
+    JPpredOutput = JPpredOutput[5 : -1]
+    f.close()
+
+    JPprediction = []
+    for line in JPpredOutput:
+        p = line.split()
+        p = p[2].split(':')
+        p = p[1]
+        JPprediction.append(int(float(p)))
+
+    # merge VN and JP prediction
+    mergePrediction = VNpredSmooth[:]
+    for i in range(len(mergePrediction)):
+        if mergePrediction[i] == 1:
+            # if non-vocal, then check it's jinghu or percussion
+            mergePrediction[i] = JPprediction[i] + 1    # percussion becomes 1, jinghu becomes 2
+        
+    annotationGen(VNpredSmooth, outputFolder + '/segAnnotationVNSmooth.txt', windowLength)
+    annotationGen(mergePrediction, outputFolder + '/segAnnotationMerge.txt', windowLength)
