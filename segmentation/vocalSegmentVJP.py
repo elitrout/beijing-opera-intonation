@@ -78,6 +78,107 @@ def smoothPrediction(prediction):
 
     return predSmooth
 
+def smoothPredictionVJP(prediction):
+    """ Smooth prediction """
+
+    predSmooth = prediction[:]
+    predLen = len(predSmooth)
+
+    # smooth jinghu part
+    for i in range(predLen):
+        smoothWindow = predSmooth[max(0, i - 2) : min(predLen, i + 3)]
+        if predSmooth[i] == 2:    # 0:vocal, 1:percussion, 2:jinghu
+            v = 0
+            p = 0
+            j = 0
+            for x in smoothWindow:
+                if x == 0:
+                    v += 1
+                elif x == 1:
+                    p += 1
+                elif x == 2:
+                    j += 1
+            if j <= 2:
+                if v >= p:
+                    predSmooth[i] = 0
+                else:
+                    predSmooth[i] = 1
+
+    # smooth jinghu part again
+    for i in range(predLen):
+        smoothWindow = predSmooth[max(0, i - 2) : min(predLen, i + 3)]
+        if predSmooth[i] == 2:    # 0:vocal, 1:percussion, 2:jinghu
+            v = 0
+            p = 0
+            j = 0
+            for x in smoothWindow:
+                if x == 0:
+                    v += 1
+                elif x == 1:
+                    p += 1
+                elif x == 2:
+                    j += 1
+            if j <= 2:
+                if v >= p:
+                    predSmooth[i] = 0
+                else:
+                    predSmooth[i] = 1
+
+    # smooth vocal part
+    for i in range(predLen):
+        smoothWindow = predSmooth[max(0, i - 2) : min(predLen, i + 3)]
+        if predSmooth[i] == 0:    # 0:vocal, 1:percussion, 2:jinghu
+            v = 0
+            p = 0
+            j = 0
+            for x in smoothWindow:
+                if x == 0:
+                    v += 1
+                elif x == 1:
+                    p += 1
+                elif x == 2:
+                    j += 1
+            if v <= 2:
+                if j >= p:
+                    predSmooth[i] = 2
+                else:
+                    predSmooth[i] = 1
+
+    # smooth percussion part
+    for i in range(predLen):
+        smoothWindow = predSmooth[max(0, i - 2) : min(predLen, i + 3)]
+        if predSmooth[i] == 1:    # 0:vocal, 1:percussion, 2:jinghu
+            v = 0
+            p = 0
+            j = 0
+            for x in smoothWindow:
+                if x == 0:
+                    v += 1
+                elif x == 1:
+                    p += 1
+                elif x == 2:
+                    j += 1
+            if p <= 2:
+                if j >= v:
+                    predSmooth[i] = 2
+                else:
+                    predSmooth[i] = 0
+
+    # smooth out short fragments between  percussion parts
+    mStart = -1
+    mEnd = -1
+    for i in range(predLen - 1):
+        if predSmooth[i] == 1 and predSmooth[i + 1] != 1:
+            mStart = i + 1
+        if predSmooth[i] != 1 and predSmooth[i + 1] == 1:
+            mEnd = i
+            if mStart != -1 and mEnd != -1 and mStart <= mEnd \
+               and mEnd - mStart <= 13:    # (mEnd - mStart) * windowLength = fragment length
+                for m in range(mStart, mEnd + 1):
+                    predSmooth[m] = 1
+
+    return predSmooth
+
 def annotationGen(prediction, annotationFile, windowLength):
     """ Write annotation to file """
 
@@ -185,8 +286,8 @@ if __name__ ==  '__main__':
         p = p[1]
         VJPprediction.append(int(float(p)))
 
-    # # smooth prediction
-    # VNpredSmooth = smoothPrediction(VNprediction)
+    # smooth prediction
+    VJPpredSmooth = smoothPredictionVJP(VJPprediction)
 
     # # merge VN and JP prediction
     # mergePrediction = VNpredSmooth[:]
@@ -195,4 +296,4 @@ if __name__ ==  '__main__':
     #         # if non-vocal, then check it's jinghu or percussion
     #         mergePrediction[i] = JPprediction[i] + 1    # percussion becomes 1, jinghu becomes 2
         
-    annotationGen(VJPprediction, outputFolder + '/segAnnotationVJP.txt', windowLength)
+    annotationGen(VJPpredSmooth, outputFolder + '/segAnnotationVJP.txt', windowLength)
