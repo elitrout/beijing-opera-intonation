@@ -43,8 +43,10 @@ sed -n '192,$p' ./data/feature/test_nonvoice/nonvoice.arff >> ./data/feature/tes
 python normalize.py 'train' ./data/feature/test_merge/merge.arff ./data/feature/test_merge/merge_norm.arff
 # the fix label data type (string to REAL) caused by normalize.py
 # change from "@ATTRIBUTE segment {voice, instrument}" to "@ATTRIBUTE segment {0.000000000000000000e+00, 1.000000000000000000e+00}" (at line 189)
-sed '189 c @ATTRIBUTE segment {0.000000000000000000e+00, 1.000000000000000000e+00}' ./data/feature/test_merge/merge_norm.arff > ./data/feature/test_merge/merge_norm_label01.arff
+# sed '189 c @ATTRIBUTE segment {0.000000000000000000e+00, 1.000000000000000000e+00}' ./data/feature/test_merge/merge_norm.arff > ./data/feature/test_merge/merge_norm_label01.arff
+sed -i '.original' 's/@ATTRIBUTE segment {jinghu, percussion}/@ATTRIBUTE segment {0.000000000000000000e+00,1.000000000000000000e+00}/' ./data/arias/merge/jinghuPercussion_norm.arff
 
 # 4. Weka classification
 # Default memory assigned to java VM is about 1G. Have to increase the memory manually
-nohup java -Xmx12G -cp ~/Documents/Tools/weka-3-6-11/weka.jar weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0" -x 10 -t merge_norm_label01.arff > result.txt &
+# nohup java -Xmx12G -cp ~/Documents/Tools/weka-3-6-11/weka.jar weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0" -x 10 -t merge_norm_label01.arff > result.txt &
+nohup java -Xmx12G -cp ~/Documents/Tools/weka-3-6-11/weka.jar weka.classifiers.functions.SMO -C 1.0 -L 0.0010 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0" -x 10 -t merge_norm_label01.arff -d xxx.model> result.txt &

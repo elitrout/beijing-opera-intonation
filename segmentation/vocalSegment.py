@@ -163,7 +163,7 @@ if __name__ ==  '__main__':
     os.system(cmdRenameNormfile)
 
     # trainData = './data/arias/merge/merge.arff'
-    JPnormvalueFile = './data/arias/merge/merge_norm_normvalue.pkl'
+    JPnormvalueFile = './data/arias/merge/jinghuPercussion_norm_normvalue.pkl'
     JParffFile = featureFolder + '.arff'
 
     # replace class name for some internal reasons
@@ -181,7 +181,7 @@ if __name__ ==  '__main__':
 
     VNmodelFile = './data/feature/test_merge/merge_norm.model'
     VNpredictionFile = outputFolder + '/predictionVN.txt'
-    JPmodelFile = './data/arias/merge/jinghuPercussion.model'
+    JPmodelFile = './data/arias/merge/jinghuPercussionAll.model'
     JPpredictionFile = outputFolder + '/predictionJP.txt'
 
     predict(JAVAPATH, VNnormFile, VNmodelFile, VNpredictionFile)
