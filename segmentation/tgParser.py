@@ -29,9 +29,18 @@ class tgParser:
     def segVoice(self):
         banshi = self.data['tiers'][6]['intervals']
         syllable = self.data['tiers'][8]['intervals']
+        luogu = self.data['tiers'][9]['intervals']
         voiceSeg = []
         percussionSeg = []
         jinghuSeg = []
+        luoguSeg = []
+        nonLuoguSeg = []
+
+        for i in range(len(luogu)):
+            if luogu[i]['text'] != '':
+                luoguSeg.append([luogu[i]['xmin'], luogu[i]['xmax']])
+            else:
+                nonLuoguSeg.append([luogu[i]['xmin'], luogu[i]['xmax']])
 
         for i in range(len(syllable)):
             if syllable[i]['text'] == '':
@@ -76,7 +85,7 @@ class tgParser:
         for i in reversed(exclude):
             del jinghuSeg[i]
 
-        return voiceSeg, jinghuSeg, percussionSeg
+        return voiceSeg, jinghuSeg, percussionSeg, luoguSeg, nonLuoguSeg
 
 
 # if __name__ == '__main__':
