@@ -131,7 +131,7 @@ if __name__ ==  '__main__':
     inputFile = sys.argv[1]
     # outputFolder = sys.argv[2]
     # inputFile = './data/laoshengxipi04.wav'
-    outputFolder = './data/output_' + os.path.basename(inputFile)[:-4]
+    outputFolder = './data/output_vocal_' + os.path.basename(inputFile)[:-4]
 
     os.makedirs(outputFolder)
 
