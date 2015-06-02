@@ -3,8 +3,8 @@
 clear
 close all
 
-[mix,fs] = audioread('~/Downloads/1-02yutangchun.wav');
-[back,fs] = audioread('~/Downloads/1-08yutangchun_back.wav');
+[mix,fs] = audioread('../../cleanvoice/data/1-01yinpingongzhu.wav');
+[back,fs] = audioread('../../cleanvoice/data/1-08yinpingongzhu_bg.wav');
 x = mix(:,1);                                % Select a channel
 L = size(x,1);                                  % Audio length
 b = back(:,1);
@@ -48,9 +48,13 @@ for k = 1:F
     % overlap-add
     xr((k-1)*H+1 : (k-1)*H+N) = xr((k-1)*H+1 : (k-1)*H+N) + (xi.*sw)';
 end
-xr = xr.*H/sum(sw.^2);      % Normalization
 
-outputAudio = './data/SpecSub.wav';
+xr = xr.*H/sum(sw.^2);      % Normalization
+xr = xr/max(abs(xr)*(1+eps));    % Normalize
+xr(xr>=0.9999) = 1-0.0001;     % Remove clipping
+%xr(xr>=1) = 1-eps;
+
+outputAudio = '../../cleanvoice/data/SpecSub_yinpingongzhu.wav';
 wavwrite(xr,fs,outputAudio);
 
 %% Plot results
